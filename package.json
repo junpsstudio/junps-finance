@@ -1,33 +1,53 @@
 {
-  "name": "junps-thumbs",
-  "productName": "Junps Thumbs",
-  "version": "1.0.0",
-  "description": "Organizador de projetos de thumbnail para YouTube",
-  "main": "src/main.js",
-  "author": "Davi",
-  "license": "MIT",
+  "name": "junps-finance",
+  "version": "1.2.1",
+  "description": "Junps Finance — studio manager: expenses, clients, invoices and goals",
+  "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "dist": "electron-builder --win"
+    "build": "electron-builder"
   },
+  "author": "Junps Studio",
+  "license": "MIT",
   "devDependencies": {
-    "electron": "^33.2.0",
-    "electron-builder": "^25.1.8"
+    "electron": "^38.0.0",
+    "electron-builder": "^26.0.0"
   },
   "build": {
-    "appId": "com.junps.thumbs",
-    "productName": "Junps Thumbs",
+    "appId": "io.junpsstudios.financemanager",
+    "productName": "Junps Finance",
     "files": [
-      "src/**/*"
+      "main.js",
+      "preload.js",
+      "index.html",
+      "index.en.html",
+      "thumbs.html",
+      "build/icon.png",
+      "build/icon.ico",
+      "node_modules/**/*"
     ],
     "win": {
-      "target": "nsis",
-      "icon": "src/assets/icon.ico"
+      "target": ["nsis"],
+      "icon": "build/icon.ico",
+      "artifactName": "Junps-Finance-Setup-${version}.${ext}"
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "deleteAppDataOnUninstall": false
+    },
+    "directories": { "buildResources": "build" },
+    "publish": {
+      "provider": "github",
+      "owner": "junpsstudio",
+      "repo": "junps-finance",
+      "releaseType": "release"
     }
+  },
+  "dependencies": {
+    "html2pdf.js": "^0.10.1",
+    "electron-updater": "^6.3.9"
   }
 }
