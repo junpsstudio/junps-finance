@@ -15,14 +15,6 @@ contextBridge.exposeInMainWorld('fm', {
   abrirArquivo: (caminho) => ipcRenderer.send('arquivo:abrir', caminho),
   mostrarArquivo: (caminho) => ipcRenderer.send('arquivo:mostrar', caminho),
   excluirArquivo: (caminho) => ipcRenderer.send('arquivo:excluir', caminho),
-  // pastas de trabalho (Junps Thumbs)
-  escolherPasta: () => ipcRenderer.invoke('pasta:escolher'),
-  listarVideos: (pasta) => ipcRenderer.invoke('pasta:listar-videos', pasta),
-  criarPastaVideo: (pasta, nome) => ipcRenderer.invoke('pasta:criar-video', { pasta, nome }),
-  renomearPastaVideo: (de, para) => ipcRenderer.invoke('pasta:renomear-video', { de, para }),
-  abrirPasta: (caminho) => ipcRenderer.send('pasta:abrir', caminho),
-  pastaExiste: (caminho) => ipcRenderer.invoke('pasta:existe', caminho),
-  lerImagem: (caminho) => ipcRenderer.invoke('imagem:ler', caminho),
   // atualização automática
   versao: () => ipcRenderer.invoke('versao'),
   verificarUpdate: () => ipcRenderer.send('verificar-update'),
