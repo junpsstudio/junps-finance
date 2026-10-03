@@ -1,6 +1,6 @@
 {
   "name": "junps-finance",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Junps Finance — studio manager: expenses, clients, invoices and goals",
   "main": "main.js",
   "scripts": {
@@ -26,6 +26,7 @@
       "preload.js",
       "index.html",
       "index.en.html",
+      "thumbs.html",
       "build/icon.png",
       "build/icon.ico",
       "node_modules/**/*"

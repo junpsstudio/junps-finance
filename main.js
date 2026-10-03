@@ -16,6 +16,8 @@ const isoLocal = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2,
 const pastaApp = () => path.join(app.getPath('documents'), 'Junps Finance');
 const pastaBackup = () => path.join(pastaApp(), 'backups');
 const pastaLogs = () => path.join(pastaApp(), 'logs');
+const pastaDados = () => path.join(pastaApp(), 'dados');
+const pastaArquivos = () => path.join(pastaApp(), 'arquivos');
 
 // ---- Registro de erros em arquivo (um por mês, nunca cresce sem limite) ----
 function log(linha) {
@@ -39,12 +41,53 @@ ipcMain.on('auto-backup', (_event, json) => {
     const hoje = isoLocal(new Date());
     fs.writeFileSync(path.join(dir, `backup-${hoje}.json`), json);          // um arquivo por dia (sobrescreve no mesmo dia)
     fs.writeFileSync(path.join(dir, 'latest.json'), json);                   // sempre o mais recente
+    // espelho dos dados em disco (gravação atômica: escreve num temporário e renomeia)
+    fs.mkdirSync(pastaDados(), { recursive: true });
+    const tmp = path.join(pastaDados(), 'junps.json.tmp');
+    fs.writeFileSync(tmp, json);
+    fs.renameSync(tmp, path.join(pastaDados(), 'junps.json'));
     const antigos = fs.readdirSync(dir).filter(f => /^backup-\d{4}-\d{2}-\d{2}\.json$/.test(f)).sort().reverse().slice(30);
     antigos.forEach(f => fs.unlinkSync(path.join(dir, f)));
   } catch (err) {
     log(`[${new Date().toLocaleString()}] backup: ${err.message}`);
   }
 });
+
+// ---- Dados em disco: leitura do espelho (usada para restaurar se o armazenamento interno estiver vazio) ----
+ipcMain.handle('dados:ler', () => {
+  try {
+    const arq = path.join(pastaDados(), 'junps.json');
+    if (fs.existsSync(arq)) return JSON.parse(fs.readFileSync(arq, 'utf8'));
+    const latest = path.join(pastaBackup(), 'latest.json');
+    if (fs.existsSync(latest)) return JSON.parse(fs.readFileSync(latest, 'utf8'));
+  } catch (err) { log(`[${new Date().toLocaleString()}] dados:ler: ${err.message}`); }
+  return null;
+});
+
+// ---- Arquivos (anexos, logos, thumbnails) guardados como arquivos de verdade em Documentos\Junps Finance\arquivos ----
+const nomeSeguro = n => String(n || 'arquivo').replace(/[\\/:*?"<>|\x00-\x1f]/g, '_').slice(0, 120);
+const dentroDeArquivos = p => { const base = path.resolve(pastaArquivos()) + path.sep; return path.resolve(p).startsWith(base); };
+ipcMain.handle('arquivo:salvar', (_e, { pasta, nome, dataUrl }) => {
+  const dir = path.join(pastaArquivos(), ...String(pasta || '').split('/').filter(Boolean).map(nomeSeguro));
+  fs.mkdirSync(dir, { recursive: true });
+  const m = /^data:([^;]+);base64,(.*)$/s.exec(dataUrl || '');
+  if (!m) throw new Error('conteúdo inválido');
+  let destino = path.join(dir, nomeSeguro(nome));
+  if (fs.existsSync(destino)) { const ext = path.extname(destino); destino = path.join(dir, `${path.basename(destino, ext)}-${Date.now()}${ext}`); }
+  fs.writeFileSync(destino, Buffer.from(m[2], 'base64'));
+  return destino;
+});
+ipcMain.handle('arquivo:ler', (_e, caminho) => {
+  if (!dentroDeArquivos(caminho) || !fs.existsSync(caminho)) return null;
+  const ext = path.extname(caminho).toLowerCase();
+  const mime = { '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.gif': 'image/gif', '.pdf': 'application/pdf' }[ext] || 'application/octet-stream';
+  return `data:${mime};base64,${fs.readFileSync(caminho).toString('base64')}`;
+});
+ipcMain.on('arquivo:abrir', (_e, caminho) => { if (dentroDeArquivos(caminho) && fs.existsSync(caminho)) shell.openPath(caminho); });
+ipcMain.on('arquivo:mostrar', (_e, caminho) => { if (dentroDeArquivos(caminho) && fs.existsSync(caminho)) shell.showItemInFolder(caminho); });
+ipcMain.on('arquivo:excluir', (_e, caminho) => { try { if (dentroDeArquivos(caminho) && fs.existsSync(caminho)) fs.unlinkSync(caminho); } catch (err) { log(`[${new Date().toLocaleString()}] arquivo:excluir: ${err.message}`); } });
+ipcMain.on('abrir-pasta-app', () => { fs.mkdirSync(pastaApp(), { recursive: true }); shell.openPath(pastaApp()); });
+ipcMain.on('abrir-modulo', (_e, arquivo) => { if (mainWindow && /^[a-z.]+\.html$/.test(arquivo)) mainWindow.loadFile(arquivo); });
 
 // Compatibilidade: quem já tinha backups em "Documentos\Finance Manager" continua encontrando-os
 try {
