@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, shell } = require('electron');
+const { app, BrowserWindow, ipcMain, shell, dialog } = require('electron');
 let autoUpdater = null;
 try { ({ autoUpdater } = require('electron-updater')); } catch (e) { /* sem o pacote (ex.: rodando do código-fonte) */ }
 const path = require('path');
@@ -88,6 +88,67 @@ ipcMain.on('arquivo:mostrar', (_e, caminho) => { if (dentroDeArquivos(caminho) &
 ipcMain.on('arquivo:excluir', (_e, caminho) => { try { if (dentroDeArquivos(caminho) && fs.existsSync(caminho)) fs.unlinkSync(caminho); } catch (err) { log(`[${new Date().toLocaleString()}] arquivo:excluir: ${err.message}`); } });
 ipcMain.on('abrir-pasta-app', () => { fs.mkdirSync(pastaApp(), { recursive: true }); shell.openPath(pastaApp()); });
 ipcMain.on('abrir-modulo', (_e, arquivo) => { if (mainWindow && /^[a-z.]+\.html$/.test(arquivo)) mainWindow.loadFile(arquivo); });
+
+// ---- Pastas de trabalho (Junps Thumbs): D:\Work\<Cliente>\Video #N - Título\Renders ----
+const RE_VIDEO = /^Video\s*#\s*(\d+)\s*-?\s*(.*)$/i;
+const RE_MODELO = /^Video\s*#\s*-?\s*(copy|cópia|modelo|template)?\s*$/i;
+const EXT_IMG = new Set(['.png', '.jpg', '.jpeg', '.webp']);
+ipcMain.handle('pasta:escolher', async () => {
+  const r = await dialog.showOpenDialog(mainWindow, { properties: ['openDirectory'] });
+  return r.canceled ? null : r.filePaths[0];
+});
+ipcMain.handle('pasta:listar-videos', (_e, pasta) => {
+  try {
+    if (!pasta || !fs.existsSync(pasta)) return { erro: 'nao-existe' };
+    const videos = [];
+    for (const d of fs.readdirSync(pasta, { withFileTypes: true })) {
+      if (!d.isDirectory()) continue;
+      const m = RE_VIDEO.exec(d.name); if (!m) continue;
+      const caminho = path.join(pasta, d.name);
+      const renders = [];
+      const dirR = path.join(caminho, 'Renders');
+      for (const base of [dirR, caminho]) {
+        if (!fs.existsSync(base)) continue;
+        for (const f of fs.readdirSync(base, { withFileTypes: true })) {
+          if (!f.isFile() || !EXT_IMG.has(path.extname(f.name).toLowerCase())) continue;
+          const st = fs.statSync(path.join(base, f.name));
+          renders.push({ nome: f.name, caminho: path.join(base, f.name), mtime: st.mtimeMs, tamanho: st.size });
+        }
+        if (renders.length) break; // prioriza Renders; só olha a raiz se Renders estiver vazia
+      }
+      renders.sort((a, b) => a.mtime - b.mtime);
+      videos.push({ nome: d.name, numero: Number(m[1]), titulo: m[2].trim(), caminho, renders, mtime: fs.statSync(caminho).mtimeMs });
+    }
+    return { videos };
+  } catch (err) { log(`[${new Date().toLocaleString()}] pasta:listar: ${err.message}`); return { erro: err.message }; }
+});
+ipcMain.handle('pasta:criar-video', (_e, { pasta, nome }) => {
+  if (!pasta || !fs.existsSync(pasta)) throw new Error('pasta de trabalho não existe');
+  const destino = path.join(pasta, nomeSeguro(nome));
+  if (fs.existsSync(destino)) return destino;
+  const modelo = fs.readdirSync(pasta, { withFileTypes: true }).find(d => d.isDirectory() && RE_MODELO.test(d.name));
+  if (modelo) fs.cpSync(path.join(pasta, modelo.name), destino, { recursive: true });
+  else ['Renders', path.join('Files', 'Archive'), path.join('Files', 'Footage')].forEach(s => fs.mkdirSync(path.join(destino, s), { recursive: true }));
+  return destino;
+});
+ipcMain.handle('pasta:renomear-video', (_e, { de, para }) => {
+  if (!de || !fs.existsSync(de)) return null;
+  const destino = path.join(path.dirname(de), nomeSeguro(para));
+  if (destino === de) return de;
+  if (fs.existsSync(destino)) throw new Error('já existe uma pasta com esse nome');
+  fs.renameSync(de, destino); return destino;
+});
+ipcMain.handle('imagem:ler', (_e, caminho) => {
+  // lê uma imagem de qualquer pasta do usuário (renders) como data URL, para gerar a miniatura do card
+  try {
+    const ext = path.extname(caminho || '').toLowerCase();
+    if (!EXT_IMG.has(ext) || !fs.existsSync(caminho) || fs.statSync(caminho).size > 60 * 1024 * 1024) return null;
+    const mime = { '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp' }[ext];
+    return `data:${mime};base64,${fs.readFileSync(caminho).toString('base64')}`;
+  } catch (err) { log(`[${new Date().toLocaleString()}] imagem:ler: ${err.message}`); return null; }
+});
+ipcMain.on('pasta:abrir', (_e, caminho) => { if (caminho && fs.existsSync(caminho)) shell.openPath(caminho); });
+ipcMain.handle('pasta:existe', (_e, caminho) => !!caminho && fs.existsSync(caminho));
 
 // Compatibilidade: quem já tinha backups em "Documentos\Finance Manager" continua encontrando-os
 try {

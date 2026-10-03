@@ -71,6 +71,22 @@
         .pill.rec { background: var(--danger-bg); border-color: var(--danger-border); color: var(--danger); font-weight: 600; font-variant-numeric: tabular-nums; }
         .pill.rec .rec { width: 6px; height: 6px; border-radius: 50%; background: var(--danger); animation: pulse 1.2s ease-in-out infinite; }
         .timer-row { display: flex; align-items: center; gap: 10px; }
+        .tcard .folder { position: absolute; right: 44px; top: 8px; width: 30px; height: 30px; border-radius: 50%; padding: 0; display: flex; align-items: center; justify-content: center; background: rgba(20,19,23,.72); color: #fff; backdrop-filter: blur(4px); opacity: 0; transition: opacity .15s; border: none; }
+        .tcard .folder svg { width: 14px; height: 14px; }
+        .tcard:hover .folder { opacity: 1; }
+        .tcard .folder:hover { background: rgba(20,19,23,.9); filter: none; }
+        .pasta-row { display: flex; align-items: center; gap: 10px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 8px 10px 8px 12px; font-size: 12.5px; color: var(--muted); margin-bottom: 14px; }
+        .pasta-row .path { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; direction: rtl; text-align: left; color: var(--text-2); }
+        .pasta-row svg { width: 16px; height: 16px; flex: none; }
+        .pastas-list { display: flex; flex-direction: column; gap: 8px; }
+        .pastas-list .row { display: grid; grid-template-columns: 130px 1fr auto auto; gap: 10px; align-items: center; padding: 10px 12px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; font-size: 13px; }
+        .pastas-list .row .path { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; direction: rtl; text-align: left; }
+        .pastas-list .row .path.empty { direction: ltr; font-style: italic; }
+        .pastas-list .row b { display: flex; align-items: center; gap: 7px; }
+        .pastas-list .row .dot { width: 8px; height: 8px; border-radius: 50%; }
+        .ver .tag.render { background: rgba(167,242,214,.9); color: #141317; }
+        #modalPastas .modal-content { max-width: 720px; }
+        .hint { font-size: 12.5px; color: var(--muted); line-height: 1.5; }
         .timer-row button { white-space: nowrap; }
         .search { display: flex; align-items: center; gap: 8px; background: var(--surface-2); border: 1px solid var(--border-strong); border-radius: 999px; padding: 8px 14px; min-width: 240px; }
         .search svg { width: 16px; height: 16px; color: var(--muted); flex: none; }
@@ -252,9 +268,9 @@
 
         <div class="tabs">
             <button class="tab-button active" data-i18n="quadro">Quadro</button>
-            <button class="tab-button soon" data-i18n-soon="calendario">Calendário<small>1.3</small></button>
-            <button class="tab-button soon" data-i18n-soon="previa">Prévia YouTube<small>1.3</small></button>
-            <button class="tab-button soon" data-i18n-soon="financeiro">Financeiro<small>1.3</small></button>
+            <button class="tab-button soon" data-i18n-soon="calendario">Calendário<small>em breve</small></button>
+            <button class="tab-button soon" data-i18n-soon="previa">Prévia YouTube<small>em breve</small></button>
+            <button class="tab-button soon" data-i18n-soon="financeiro">Financeiro<small>em breve</small></button>
         </div>
 
         <div class="content">
@@ -267,6 +283,7 @@
     <div class="modal" id="modalCard">
         <div class="modal-content">
             <div class="modal-header"><span id="cardTitulo"></span><button class="modal-close" onclick="fecharCard()">✕</button></div>
+            <div class="pasta-row" id="pastaRow" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span class="path" id="pastaPath"></span><button class="small secondary" id="btnPastaCard" onclick="pastaDoCard()"></button></div>
             <div class="card-grid">
                 <div>
                     <div class="preview" id="preview" ondragover="event.preventDefault(); this.classList.add('drop')" ondragleave="this.classList.remove('drop')" ondrop="soltarImagens(event)">
@@ -323,6 +340,17 @@
         </div>
     </div>
 
+    <!-- ===== pastas de trabalho ===== -->
+    <div class="modal" id="modalPastas">
+        <div class="modal-content">
+            <div class="modal-header"><span data-i18n="pastasTitulo">Pastas de trabalho</span><button class="modal-close" onclick="fecharModal('modalPastas')">✕</button></div>
+            <p class="hint" style="margin-bottom:14px" data-i18n="pastasDica">Escolha a pasta de cada cliente (ex.: D:\Work\SSundee). O app lê as pastas "Video #N - Título", cria os cards sozinho, puxa as imagens de "Renders" como versões e cria a pasta de cada card novo a partir do seu modelo "Video # - Copy".</p>
+            <div class="pastas-list" id="pastasList"></div>
+            <p class="hint" id="pastasAviso" style="margin-top:12px"></p>
+            <div class="modal-footer"><span class="hint left" id="pastasStatus"></span><button class="secondary" onclick="fecharModal('modalPastas')" data-i18n="fechar">Fechar</button><button class="primary" onclick="sincronizar(true)" data-i18n="sincronizar">🔄 Sincronizar agora</button></div>
+        </div>
+    </div>
+
     <!-- ===== confirm ===== -->
     <div class="modal" id="modalConfirm">
         <div class="modal-content">
@@ -375,7 +403,11 @@
                 arquivarMsg: n => `Arquivar ${n} card(s) desta coluna? Eles saem do quadro mas continuam em "Arquivados".`, arquivar: 'Arquivar', arquivados: 'Arquivados', nenhumArquivado: 'Nenhum card arquivado.',
                 movido: 'Card movido', temaClaro: 'Tema claro', temaEscuro: 'Tema escuro', ocultar: 'Ocultar valores', mostrar: 'Mostrar valores', idioma: 'Switch to English',
                 mesCurto: ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'], hoje: 'hoje', amanha: 'amanhã', atrasado: d => `${d}d atrasado`,
-                dicaDrag: 'Arraste os cards entre as colunas', parar: '■ Parar', iniciarCron: 'Iniciar cronômetro', pararCron: 'Parar cronômetro', cronIniciado: n => `⏱ Cronômetro rodando: ${n}`, cronParado: m => `⏹ Parado — ${m} registrado`, cronOutro: 'O cronômetro de outro card foi parado.'
+                dicaDrag: 'Arraste os cards entre as colunas', parar: '■ Parar', iniciarCron: 'Iniciar cronômetro', pararCron: 'Parar cronômetro', cronIniciado: n => `⏱ Cronômetro rodando: ${n}`, cronParado: m => `⏹ Parado — ${m} registrado`, cronOutro: 'O cronômetro de outro card foi parado.',
+                emBreve: 'em breve', pastas: 'Pastas', pastasTitulo: 'Pastas de trabalho', pastasDica: 'Escolha a pasta de cada cliente (ex.: D:\\Work\\SSundee). O app lê as pastas "Video #N - Título", cria os cards sozinho, puxa as imagens de "Renders" como versões e cria a pasta de cada card novo a partir do seu modelo "Video # - Copy".',
+                escolher: 'Escolher…', remover: 'Remover', semPasta: 'nenhuma pasta escolhida', fechar: 'Fechar', sincronizar: '🔄 Sincronizar agora', soNoApp: 'A sincronização de pastas só funciona no app instalado (não na prévia do navegador).',
+                abrirPasta: 'Abrir pasta', criarPasta: 'Criar pasta', pastaNaoExiste: 'A pasta deste card não foi encontrada no disco.', pastaCriada: '📁 Pasta criada', pastaRenomeada: '📁 Pasta renomeada', erroPasta: m => `Não deu para mexer na pasta: ${m}`,
+                syncResumo: (c, r) => `✅ Sincronizado: ${c} card(s) novo(s), ${r} render(s) nova(s)`, syncNada: '✅ Tudo sincronizado, nada novo', syncErroPasta: n => `Pasta de ${n} não encontrada`, syncAndamento: 'Sincronizando…', ultimaSync: d => `Última sincronização: ${d}`, abrirPastaCliente: 'Abrir'
             },
             en: {
                 buscar: 'Search', novoCard: '+ New card', quadro: 'Board', calendario: 'Calendar', previa: 'YouTube preview', financeiro: 'Finance',
@@ -396,7 +428,11 @@
                 arquivarMsg: n => `Archive ${n} card(s) from this column? They leave the board but stay under "Archived".`, arquivar: 'Archive', arquivados: 'Archived', nenhumArquivado: 'No archived cards.',
                 movido: 'Card moved', temaClaro: 'Light theme', temaEscuro: 'Dark theme', ocultar: 'Hide amounts', mostrar: 'Show amounts', idioma: 'Mudar para português',
                 mesCurto: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], hoje: 'today', amanha: 'tomorrow', atrasado: d => `${d}d late`,
-                dicaDrag: 'Drag cards between columns', parar: '■ Stop', iniciarCron: 'Start timer', pararCron: 'Stop timer', cronIniciado: n => `⏱ Timer running: ${n}`, cronParado: m => `⏹ Stopped — ${m} logged`, cronOutro: 'The timer of another card was stopped.'
+                dicaDrag: 'Drag cards between columns', parar: '■ Stop', iniciarCron: 'Start timer', pararCron: 'Stop timer', cronIniciado: n => `⏱ Timer running: ${n}`, cronParado: m => `⏹ Stopped — ${m} logged`, cronOutro: 'The timer of another card was stopped.',
+                emBreve: 'soon', pastas: 'Folders', pastasTitulo: 'Work folders', pastasDica: 'Pick each client\'s folder (e.g. D:\\Work\\SSundee). The app reads the "Video #N - Title" folders, creates the cards by itself, pulls the images in "Renders" as versions and creates the folder of every new card from your "Video # - Copy" template.',
+                escolher: 'Choose…', remover: 'Remove', semPasta: 'no folder chosen', fechar: 'Close', sincronizar: '🔄 Sync now', soNoApp: 'Folder sync only works in the installed app (not in the browser preview).',
+                abrirPasta: 'Open folder', criarPasta: 'Create folder', pastaNaoExiste: 'This card\'s folder was not found on disk.', pastaCriada: '📁 Folder created', pastaRenomeada: '📁 Folder renamed', erroPasta: m => `Could not touch the folder: ${m}`,
+                syncResumo: (c, r) => `✅ Synced: ${c} new card(s), ${r} new render(s)`, syncNada: '✅ Everything in sync, nothing new', syncErroPasta: n => `Folder of ${n} not found`, syncAndamento: 'Syncing…', ultimaSync: d => `Last sync: ${d}`, abrirPastaCliente: 'Open'
             }
         };
         let idioma = localStorage.getItem('idioma') === 'en' ? 'en' : 'pt';
@@ -405,7 +441,7 @@
             document.documentElement.lang = idioma === 'en' ? 'en' : 'pt-BR';
             document.querySelectorAll('[data-i18n]').forEach(el => el.textContent = t(el.dataset.i18n));
             document.querySelectorAll('[data-i18n-ph]').forEach(el => el.placeholder = t(el.dataset.i18nPh));
-            document.querySelectorAll('[data-i18n-soon]').forEach(el => el.innerHTML = esc(t(el.dataset.i18nSoon)) + '<small>1.3</small>');
+            document.querySelectorAll('[data-i18n-soon]').forEach(el => el.innerHTML = esc(t(el.dataset.i18nSoon)) + '<small>' + esc(t('emBreve')) + '</small>');
             $('btnIdioma').innerHTML = idioma === 'en' ? FLAG_BR : FLAG_US;
             $('btnIdioma').title = t('idioma');
             aplicarPrivado(); aplicarTema(document.documentElement.getAttribute('data-theme') || 'dark', false);
@@ -569,6 +605,7 @@
                 <span class="stripe" style="background:${cor}"></span>
                 <div class="thumb">${v ? `<img src="${srcVersao(v)}" alt="" loading="lazy">` : `<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8 8"/></svg>${esc(t('semImagem'))}</div>`}
                     ${(c.versoes?.length || 0) > 1 ? `<span class="vers">${esc(t('versoes')(c.versoes.length))}</span>` : ''}
+                    ${c.pasta ? `<button class="folder" onclick="event.stopPropagation(); window.fm?.abrirPasta && window.fm.abrirPasta(${JSON.stringify(c.pasta).replace(/"/g, '&quot;')})" title="${esc(t('abrirPasta'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></button>` : ''}
                     <button class="play" onclick="event.stopPropagation(); alternarCronometro(${c.id})" title="${esc(rodando ? t('pararCron') : t('iniciarCron'))}">${rodando ? '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>' : '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>'}</button>
                 </div>
                 <div class="tbody">
@@ -592,6 +629,7 @@
                 <span class="chip ${filtroCliente === 'todos' ? 'active' : ''}" onclick="filtrar('todos')">${esc(t('todos'))} <span class="n">${ativos.length}</span></span>
                 ${cs.map((c, i) => `<span class="chip ${filtroCliente === c.id ? 'active' : ''}" onclick="filtrar(${c.id})"><span class="dot" style="background:${PALETA[i % PALETA.length]}"></span>${esc(c.nome)} <span class="n">${c.n}</span></span>`).join('')}
                 <span class="chip add" onclick="abrirModal('modalClienteRapido'); $('cNome').value=''; setTimeout(()=>$('cNome').focus(),50)">${esc(t('addCliente'))}</span>
+                <span class="chip add" onclick="abrirPastas()" title="${esc(t('pastasTitulo'))}">📁 ${esc(t('pastas'))}${sincronizando ? ' …' : ''}</span>
                 ${nArq ? `<span class="chip ${filtroCliente === 'arquivados' ? 'active' : ''}" onclick="filtrar('arquivados')">🗂 ${esc(t('arquivados'))} <span class="n">${nArq}</span></span>` : ''}
                 <span class="focus-toggle ${foco ? 'on' : ''}" onclick="alternarFoco()"><span>${esc(t('foco'))}</span><span class="sw"></span></span>`;
         }
@@ -686,6 +724,40 @@
         }
         function cronometroDoModal() { if (!cardEdit || novoCard) return; alternarCronometro(cardEdit.id); renderBtnCronModal(); }
 
+        // numeração por cliente (SSundee #1, #2… / Skiddzie #1, #2…)
+        function proximoNumeroCliente(clienteId) {
+            const nums = dados.cards.filter(c => (c.clienteId || null) === (clienteId || null)).map(c => Number(c.numero) || 0);
+            return nums.length ? Math.max(...nums) + 1 : 1;
+        }
+        let numeroTocado = false;
+        document.addEventListener('DOMContentLoaded', () => {
+            $('fNumero').addEventListener('input', () => numeroTocado = true);
+            $('fCliente').addEventListener('change', () => { if (novoCard && !numeroTocado) $('fNumero').value = proximoNumeroCliente(Number($('fCliente').value) || null); renderPastaRow(); });
+        });
+        const nomePastaVideo = c => `Video #${c.numero || ''} - ${c.titulo || ''}`.replace(/\s+$/, '');
+        const pastaDoCliente = id => clientes().find(c => c.id === id)?.pastaTrabalho || '';
+        function renderPastaRow() {
+            const row = $('pastaRow'); if (!cardEdit) return;
+            const cli = Number($('fCliente').value) || cardEdit.clienteId;
+            const base = pastaDoCliente(cli);
+            if (!window.fm?.abrirPasta || (!cardEdit.pasta && !base)) { row.style.display = 'none'; return; }
+            row.style.display = '';
+            $('pastaPath').textContent = cardEdit.pasta || (base + '\\' + nomePastaVideo({ numero: $('fNumero').value, titulo: $('fTitulo').value || '…' }));
+            $('btnPastaCard').textContent = cardEdit.pasta ? t('abrirPasta') : t('criarPasta');
+        }
+        async function pastaDoCard() {
+            if (!cardEdit) return;
+            if (cardEdit.pasta) { if (await window.fm.pastaExiste(cardEdit.pasta)) window.fm.abrirPasta(cardEdit.pasta); else toast(t('pastaNaoExiste'), true); return; }
+            const cli = Number($('fCliente').value) || null; const base = pastaDoCliente(cli);
+            if (!base) return;
+            const titulo = $('fTitulo').value.trim(); if (!titulo) { toast(t('tituloObrigatorio'), true); $('fTitulo').focus(); return; }
+            try {
+                cardEdit.pasta = await window.fm.criarPastaVideo(base, nomePastaVideo({ numero: Number($('fNumero').value) || null, titulo }));
+                toast(t('pastaCriada')); renderPastaRow();
+                const i = dados.cards.findIndex(c => c.id === cardEdit.id); if (i >= 0) { dados.cards[i].pasta = cardEdit.pasta; salvar(); }
+            } catch (err) { registrarErro('pasta', err.message); toast(t('erroPasta')(err.message), true); }
+        }
+
         // ---------- modal do card ----------
         let cardEdit = null;      // card em edição (cópia de trabalho)
         let novoCard = false;
@@ -694,7 +766,8 @@
             if (id != null && typeof id === 'object') id = null;
             const base = id != null ? dados.cards.find(c => c.id === id) : null;
             novoCard = !base; versoesNovas = [];
-            cardEdit = base ? JSON.parse(JSON.stringify(base)) : { id: Date.now(), numero: dados.proximoNumero || 1, titulo: '', clienteId: filtroCliente !== 'todos' && filtroCliente !== 'arquivados' ? filtroCliente : null, coluna: col, prazo: '', valor: '', pago: false, tempo: 0, link: '', notas: '', checklist: t('checklistPadrao').map(x => ({ t: x, ok: false })), versoes: [], versaoAtual: null, criadoEm: hojeISO() };
+            const cliSugerido = filtroCliente !== 'todos' && filtroCliente !== 'arquivados' ? filtroCliente : null;
+            cardEdit = base ? JSON.parse(JSON.stringify(base)) : { id: Date.now(), numero: proximoNumeroCliente(cliSugerido), titulo: '', clienteId: filtroCliente !== 'todos' && filtroCliente !== 'arquivados' ? filtroCliente : null, coluna: col, prazo: '', valor: '', pago: false, tempo: 0, link: '', notas: '', checklist: t('checklistPadrao').map(x => ({ t: x, ok: false })), versoes: [], versaoAtual: null, criadoEm: hojeISO() };
             $('cardTitulo').textContent = novoCard ? t('novoCardTitulo') : t('editarCard');
             $('btnExcluirCard').style.display = novoCard ? 'none' : '';
             $('fCliente').innerHTML = `<option value="">${esc(t('semCliente'))}</option>` + clientes().map(c => `<option value="${c.id}">${esc(c.nome)}</option>`).join('');
@@ -705,7 +778,8 @@
             $('fValor').value = cardEdit.valor || ''; $('fPago').checked = !!cardEdit.pago;
             $('fHoras').value = Math.floor((cardEdit.tempo || 0) / 60) || ''; $('fMin').value = (cardEdit.tempo || 0) % 60 || '';
             $('fLink').value = cardEdit.link || ''; $('fNotas').value = cardEdit.notas || '';
-            renderVersoes(); renderChecklist(); renderBtnCronModal();
+            renderVersoes(); renderChecklist(); renderBtnCronModal(); renderPastaRow();
+            numeroTocado = false;
             abrirModal('modalCard');
             setTimeout(() => $('fTitulo').focus(), 60);
         }
@@ -728,6 +802,8 @@
             cardEdit.checklist = lerChecklistDoForm();
             if (cardEdit.coluna === 'live' && !cardEdit.liveEm) cardEdit.liveEm = hojeISO();
             const i = dados.cards.findIndex(c => c.id === cardEdit.id);
+            const anterior = i >= 0 ? dados.cards[i] : null;
+            sincronizarPastaDoCard(cardEdit, anterior);
             if (i >= 0) { if (dados.cards[i].coluna !== cardEdit.coluna) cardEdit.ordem = 1e6; dados.cards[i] = cardEdit; }
             else { cardEdit.ordem = 1e6; dados.cards.push(cardEdit); }
             if (cardEdit.numero && cardEdit.numero >= (dados.proximoNumero || 1)) dados.proximoNumero = cardEdit.numero + 1;
@@ -736,6 +812,27 @@
             versoesNovas = []; novoCard = false;
             salvar(); fecharCard(); render(); toast(t('cardSalvo'));
         }
+        // cria a pasta "Video #N - Título" para card novo (se o cliente tem pasta) e renomeia quando número/título mudam
+        async function sincronizarPastaDoCard(card, anterior) {
+            if (!window.fm?.criarPastaVideo) return;
+            try {
+                if (!card.pasta) {
+                    const base = pastaDoCliente(card.clienteId); if (!base) return;
+                    card.pasta = await window.fm.criarPastaVideo(base, nomePastaVideo(card));
+                    const k = dados.cards.findIndex(c => c.id === card.id); if (k >= 0) { dados.cards[k].pasta = card.pasta; salvar(); render(); }
+                    toast(t('pastaCriada'));
+                } else if (anterior && (anterior.numero !== card.numero || anterior.titulo !== card.titulo) && await window.fm.pastaExiste(card.pasta)) {
+                    const nova = await window.fm.renomearPastaVideo(card.pasta, nomePastaVideo(card));
+                    if (nova && nova !== card.pasta) {
+                        const velha = card.pasta; card.pasta = nova;
+                        (card.versoes || []).forEach(v => { if (v.caminho && v.caminho.startsWith(velha)) v.caminho = nova + v.caminho.slice(velha.length); });
+                        const k = dados.cards.findIndex(c => c.id === card.id); if (k >= 0) { dados.cards[k] = card; salvar(); render(); }
+                        toast(t('pastaRenomeada'));
+                    }
+                }
+            } catch (err) { registrarErro('pasta', err.message); toast(t('erroPasta')(err.message), true); }
+        }
+
         async function excluirCard() {
             if (!cardEdit || novoCard) return;
             if (!await confirmar(t('excluirCardMsg'), t('excluirCardTitulo'), t('excluir'))) return;
@@ -752,7 +849,7 @@
             $('btnAbrirImg').style.display = v && (v.caminho || v.dataUrl) ? '' : 'none';
             $('versoes').innerHTML = (cardEdit.versoes || []).map((x, i) => `
                 <div class="ver ${x.id === (v && v.id) ? 'current' : ''}" onclick="cardEdit.versaoAtual=${x.id}; renderVersoes()" title="${esc(x.nome)}">
-                    <img src="${srcVersao(x)}" alt=""><span class="tag">v${i + 1}</span><button class="x" onclick="event.stopPropagation(); removerVersao(${x.id})">✕</button>
+                    <img src="${srcVersao(x)}" alt=""><span class="tag ${x.origem === 'render' ? 'render' : ''}">v${i + 1}</span><button class="x" onclick="event.stopPropagation(); removerVersao(${x.id})">✕</button>
                 </div>`).join('');
         }
         async function adicionarVersoes(files) {
@@ -809,6 +906,64 @@
             render();
         }
 
+        // ---------- pastas de trabalho por cliente + sincronização ----------
+        let sincronizando = false;
+        function abrirPastas() { renderPastas(); abrirModal('modalPastas'); }
+        function renderPastas() {
+            const cs = clientes(); const noApp = !!window.fm?.escolherPasta;
+            $('pastasAviso').textContent = noApp ? '' : t('soNoApp');
+            $('pastasList').innerHTML = cs.map((c, i) => `
+                <div class="row">
+                    <b><span class="dot" style="background:${PALETA[i % PALETA.length]}"></span>${esc(c.nome)}</b>
+                    <span class="path ${c.pastaTrabalho ? '' : 'empty'}" title="${esc(c.pastaTrabalho || '')}">${esc(c.pastaTrabalho || t('semPasta'))}</span>
+                    <button class="small secondary" onclick="escolherPastaCliente(${c.id})" ${noApp ? '' : 'disabled'}>${esc(t('escolher'))}</button>
+                    ${c.pastaTrabalho ? `<button class="small secondary" onclick="window.fm?.abrirPasta && window.fm.abrirPasta(${JSON.stringify(c.pastaTrabalho).replace(/"/g, '&quot;')})">${esc(t('abrirPastaCliente'))}</button>` : `<span></span>`}
+                </div>`).join('');
+            const ult = dados.ultimaSync ? new Date(dados.ultimaSync).toLocaleString() : '';
+            $('pastasStatus').textContent = sincronizando ? t('syncAndamento') : (ult ? t('ultimaSync')(ult) : '');
+        }
+        async function escolherPastaCliente(id) {
+            if (!window.fm?.escolherPasta) return;
+            const p = await window.fm.escolherPasta(); if (!p) return;
+            const cs = clientes(); const c = cs.find(x => x.id === id); if (!c) return;
+            c.pastaTrabalho = p; salvarClientes(cs); renderPastas();
+            await sincronizar(true);
+        }
+        // Lê as pastas de cada cliente e cria/atualiza os cards. Pastas com render na primeira importação viram LIVE; pastas novas depois disso vão para To-Do.
+        async function sincronizar(manual = false) {
+            if (!window.fm?.listarVideos || sincronizando) return;
+            sincronizando = true; renderFiltros(); if ($('modalPastas').classList.contains('active')) renderPastas();
+            let novos = 0, renders = 0;
+            try {
+                for (const cli of clientes()) {
+                    if (!cli.pastaTrabalho) continue;
+                    const r = await window.fm.listarVideos(cli.pastaTrabalho);
+                    if (r.erro) { if (manual) toast(t('syncErroPasta')(cli.nome), true); continue; }
+                    const primeira = !dados.cards.some(c => c.clienteId === cli.id && c.pasta);
+                    for (const v of r.videos) {
+                        let card = dados.cards.find(c => c.clienteId === cli.id && (c.pasta === v.caminho || (!c.pasta && Number(c.numero) === v.numero)));
+                        if (!card) {
+                            card = { id: Date.now() + Math.floor(Math.random() * 1000), numero: v.numero, titulo: v.titulo || `Video #${v.numero}`, clienteId: cli.id, coluna: primeira && v.renders.length ? 'live' : 'todo', prazo: '', valor: '', pago: false, tempo: 0, link: '', notas: '', checklist: t('checklistPadrao').map(x => ({ t: x, ok: false })), versoes: [], versaoAtual: null, criadoEm: hojeISO(), pasta: v.caminho, ordem: 1e6 };
+                            if (card.coluna === 'live') { card.liveEm = hojeISO(); card.checklist.forEach(i => i.ok = true); }
+                            dados.cards.push(card); novos++;
+                        } else if (!card.pasta) card.pasta = v.caminho;
+                        card.versoes = card.versoes || [];
+                        for (const rd of v.renders) {
+                            if (card.versoes.some(x => x.caminho === rd.caminho)) continue;
+                            const ver = { id: Date.now() + Math.floor(Math.random() * 1000), nome: rd.nome, caminho: rd.caminho, origem: 'render', data: isoLocal(new Date(rd.mtime)), mtime: rd.mtime };
+                            try { ver.preview = await window.fm.salvarArquivo(`thumbs/${String(card.numero || 0).padStart(3, '0')}-${card.id}`, 'preview-' + rd.nome.replace(/\.[^.]+$/, '') + '.jpg', await miniatura(await window.fm.lerImagem(rd.caminho), 640)); } catch (e) { registrarErro('preview', e.message); }
+                            card.versoes.push(ver); renders++;
+                            if (!card.versaoAtual || (card.versoes.find(x => x.id === card.versaoAtual)?.mtime || 0) <= rd.mtime) card.versaoAtual = ver.id;
+                        }
+                    }
+                    COLUNAS.forEach(col => dados.cards.filter(c => c.coluna === col && !c.arquivado).sort((a, b) => (a.ordem ?? 0) - (b.ordem ?? 0) || (a.numero || 0) - (b.numero || 0)).forEach((c, k) => c.ordem = k));
+                }
+                dados.ultimaSync = Date.now(); salvar();
+                if (manual || novos || renders) toast(novos || renders ? t('syncResumo')(novos, renders) : t('syncNada'));
+            } catch (err) { registrarErro('sync', err.message); if (manual) toast(t('erroPasta')(err.message), true); }
+            sincronizando = false; render(); if ($('modalPastas').classList.contains('active')) renderPastas();
+        }
+
         // ---------- atualização automática ----------
         if (window.fm?.onUpdate) window.fm.onUpdate(info => { if (info.estado === 'pronto') { $('updateBarTexto').textContent = t('novaVersao')(info.versao || ''); $('updateBar').classList.add('show'); } });
 
@@ -827,6 +982,7 @@
         aplicarTema(localStorage.getItem('tema') || 'dark', false);
         aplicarIdioma();
         render(); renderTimer();
+        if (window.fm?.listarVideos) { setTimeout(() => sincronizar(false), 800); setInterval(() => sincronizar(false), 5 * 60 * 1000); }
     </script>
 </body>
 </html>
