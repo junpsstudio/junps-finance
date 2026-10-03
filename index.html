@@ -1039,7 +1039,7 @@
         }
         if (window.fm?.onUpdate) window.fm.onUpdate(tratarUpdate);
         if (window.fm?.versao) window.fm.versao().then(v => { const el = $('versaoApp'); if (el) el.textContent = 'Versão' + ' ' + v; }).catch(() => {});
-        else { const el = $('versaoApp'); if (el) el.textContent = 'Versão' + ' 1.3.0 (preview)'; }
+        else { const el = $('versaoApp'); if (el) el.textContent = 'Versão' + ' 1.3.1 (preview)'; }
         const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
         const MESES = ['', 'Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
         const fmtData = iso => iso ? new Date(iso + 'T00:00:00').toLocaleDateString('en-GB') : '—';
