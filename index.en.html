@@ -706,6 +706,10 @@
         .nv-p { font-size: 14px; color: var(--muted); margin-bottom: 18px; line-height: 1.5; }
         .nv-campos { display: flex; flex-direction: column; gap: 14px; }
 
+        /* telas grandes: abas, avisos e conteúdo na mesma largura do topo (antes esticavam até as bordas) */
+        @media (min-width: 701px) {
+            body > .tabs, body > #alertAtraso, body > .content { max-width: 1200px; margin-left: auto; margin-right: auto; }
+        }
         /* ================= 2.0: celular e tablet ================= */
         @media (max-width: 700px) {
             body { padding: 10px 10px calc(76px + env(safe-area-inset-bottom)); }
