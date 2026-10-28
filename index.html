@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#141317">
+    <meta name="junps-versao" content="2.1.0">
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
     <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -744,6 +745,83 @@
             .update-bar.show { transform: translateY(0); }
             .toast-wrap { left: 10px; right: 10px; transform: none; bottom: calc(64px + env(safe-area-inset-bottom)); align-items: stretch; }
         }
+    
+        /* ================= 2.1: animações ================= */
+        .tab-content.active.vem-dir { animation: entraDir 0.32s cubic-bezier(.2,.8,.2,1) both; }
+        .tab-content.active.vem-esq { animation: entraEsq 0.32s cubic-bezier(.2,.8,.2,1) both; }
+        @keyframes entraDir { from { opacity: 0; transform: translateX(28px); } to { opacity: 1; transform: none; } }
+        @keyframes entraEsq { from { opacity: 0; transform: translateX(-28px); } to { opacity: 1; transform: none; } }
+        .tabs { position: relative; }
+        .tabs.com-ind .tab-button.active { border-color: transparent; background: var(--surface); }
+        .tab-ind { position: absolute; z-index: 2; pointer-events: none; border-radius: 999px; padding: 1.5px; background: var(--brand);
+            -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
+            transition: left 0.38s cubic-bezier(.3,1.25,.5,1), top 0.38s cubic-bezier(.3,1.25,.5,1), width 0.38s cubic-bezier(.3,1.25,.5,1); }
+        .stat-cards > :nth-child(2), .goals-grid > :nth-child(2), .cat-list > :nth-child(2) { animation-delay: 0.04s; }
+        .stat-cards > :nth-child(3), .goals-grid > :nth-child(3), .cat-list > :nth-child(3) { animation-delay: 0.08s; }
+        .stat-cards > :nth-child(4), .goals-grid > :nth-child(4), .cat-list > :nth-child(4) { animation-delay: 0.12s; }
+        .stat-cards > :nth-child(5), .goals-grid > :nth-child(5), .cat-list > :nth-child(5) { animation-delay: 0.16s; }
+        .stat-cards > :nth-child(n+6), .goals-grid > :nth-child(n+6), .cat-list > :nth-child(n+6) { animation-delay: 0.2s; }
+        #despesasList > .card:nth-child(2) { animation-delay: 0.03s; } #despesasList > .card:nth-child(3) { animation-delay: 0.06s; }
+        #despesasList > .card:nth-child(4) { animation-delay: 0.09s; } #despesasList > .card:nth-child(5) { animation-delay: 0.12s; }
+        #despesasList > .card:nth-child(6) { animation-delay: 0.15s; } #despesasList > .card:nth-child(n+7) { animation-delay: 0.18s; }
+        .stat-card, .goal, .panel, .cat-item { transition: transform 0.22s cubic-bezier(.2,.8,.2,1), box-shadow 0.22s, border-color 0.22s; }
+        @media (hover: hover) {
+            .stat-card:hover, .goal:hover, .cat-item:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(0,0,0,0.18); border-color: var(--border-strong); }
+            .card.editavel:hover { border-color: var(--border-strong); }
+        }
+        button:active:not(:disabled) { transform: scale(0.97); }
+        .card.novo, .cc-item.novo { animation: fadeUp 0.35s ease both, flashNovo 1.6s ease 0.15s; }
+        @keyframes flashNovo { 0% { box-shadow: 0 0 0 0 rgba(167,242,214,0); } 25% { box-shadow: 0 0 0 3px rgba(167,242,214,0.55); } 100% { box-shadow: 0 0 0 0 rgba(167,242,214,0); } }
+        .card.saindo, .cc-item.saindo { animation: sair 0.26s ease forwards; overflow: hidden; }
+        @keyframes sair { to { opacity: 0; transform: translateX(36px) scale(0.97); max-height: 0; margin-top: 0; margin-bottom: 0; padding-top: 0; padding-bottom: 0; } }
+        .modal.active { animation: fundoIn 0.2s ease both; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+        @keyframes fundoIn { from { background: transparent; backdrop-filter: blur(0); } }
+        .toast-acao { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .toast-acao span { flex: 1 1 auto; }
+        .toast-acao button { padding: 5px 10px; font-size: 12.5px; background: var(--bg); color: var(--text); border: 1px solid transparent; }
+
+        /* ================= 2.1: editar despesa, etiqueta de categoria, busca, assinaturas ================= */
+        .card.editavel, .cc-item.editavel { cursor: pointer; }
+        .cat-chip { background: var(--surface-3); color: var(--text-2); border: 1px solid var(--border); border-radius: 999px; padding: 2px 9px; font-size: 12px; font-weight: 500; box-shadow: none; line-height: 1.5; }
+        .cat-chip:hover { background: var(--accent-soft); color: var(--text); border-color: var(--accent); filter: none; }
+        .cat-pop { position: absolute; z-index: 1200; max-height: 320px; overflow-y: auto; background: var(--surface); border: 1px solid var(--border-strong); border-radius: 14px; padding: 6px; box-shadow: 0 16px 40px rgba(0,0,0,0.35); animation: pop 0.16s ease both; display: flex; flex-direction: column; gap: 2px; }
+        .cat-pop button { background: transparent; color: var(--text); border: none; text-align: left; padding: 8px 10px; border-radius: 9px; font-size: 14px; box-shadow: none; }
+        .cat-pop button:hover { background: var(--surface-3); filter: none; }
+        .cat-pop button.on { background: var(--accent-soft); font-weight: 600; }
+        .desp-filtros { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin: 4px 0 16px; }
+        .desp-filtros input[type="search"] { flex: 1 1 220px; min-width: 0; }
+        .desp-filtros select { flex: 0 1 220px; }
+        .desp-filtros .chk { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-2); white-space: nowrap; }
+        #despFiltroInfo { flex-basis: 100%; font-size: 12.5px; min-height: 0; }
+        #despFiltroInfo:empty { display: none; }
+        .outros-meses .link-btn { margin-left: 4px; }
+        .filtrado { display: none !important; }
+        .ass-card { background: var(--surface-2); border: 1px solid var(--border); border-radius: 18px; margin-bottom: 20px; overflow: hidden; }
+        .ass-topo { width: 100%; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; background: transparent; border: none; color: var(--text); padding: 14px 18px; text-align: left; box-shadow: none; border-radius: 0; }
+        .ass-topo:hover { background: var(--surface-3); filter: none; }
+        .ass-topo .t { font-weight: 600; flex: 1 1 auto; }
+        .ass-topo .tg { color: var(--accent); font-size: 13px; font-weight: 600; }
+        .ass-lista { display: none; padding: 4px 18px 12px; }
+        .ass-card.open .ass-lista { display: block; animation: fadeUp 0.25s ease both; }
+        .ed-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .ed-grid .full { grid-column: 1 / -1; }
+        .ed-checks { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 4px; }
+        .ed-checks label { display: inline-flex; align-items: center; gap: 7px; font-size: 14px; color: var(--text-2); }
+        .ed-origem { font-size: 12.5px; color: var(--muted); margin-top: -10px; margin-bottom: 14px; }
+        .ed-origem:empty { display: none; }
+        .esc-opcoes { display: flex; flex-direction: column; gap: 10px; }
+        .esc-opcoes button { text-align: left; padding: 14px 16px; }
+        .esc-opcoes button small { display: block; font-weight: 400; opacity: 0.8; margin-top: 3px; }
+        /* site só com login */
+        html.gate #modalNuvem { background: var(--bg); }
+        html.gate #modalNuvem .modal-close, html.gate #nvSemConta { display: none; }
+        @media (max-width: 700px) {
+            .ed-grid { grid-template-columns: 1fr; }
+            .modal.active .modal-content { animation: sobe 0.3s cubic-bezier(.2,.8,.2,1) both; }
+            @keyframes sobe { from { opacity: 0; transform: translateY(48px); } to { opacity: 1; transform: none; } }
+            .desp-filtros select { flex: 1 1 140px; }
+            .cat-pop { max-height: 50vh; }
+        }
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
@@ -765,11 +843,28 @@
             <button class="tab-button" onclick="switchTab('empresa', this)">🏢 Empresa</button>
             <button class="tab-button" onclick="switchTab('report', this); atualizarReport()">📈 Relatório de Receitas</button>
             <button class="tab-button" onclick="switchTab('goals', this); atualizarMetas()">🎯 Metas</button>
-            <button class="tab-button" data-tab="cortes" onclick="switchTab('cortes', this)">✂️ Cortes</button>
         </div>
 
         <div class="update-bar" id="updateBar" role="status"><span class="dot"></span><span id="updateBarTexto"></span><button onclick="instalarUpdate()">Reiniciar e atualizar</button><button class="ghost" onclick="fecharUpdateBar()">Depois</button></div>
         <div class="fab-stack"><button class="fab" id="btnTema" onclick="alternarTema()" title="Alternar tema"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button><button class="fab" id="btnPrivado" onclick="alternarPrivado()" title="Ocultar valores"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="fab" id="btnIdioma" onclick="trocarIdioma()" title="Switch to English"><svg class="flag" viewBox="0 0 20 14" aria-hidden="true"><rect width="20" height="14" fill="#fff"/><g fill="#b22234"><rect y="0" width="20" height="1.08"/><rect y="2.15" width="20" height="1.08"/><rect y="4.3" width="20" height="1.08"/><rect y="6.46" width="20" height="1.08"/><rect y="8.6" width="20" height="1.08"/><rect y="10.77" width="20" height="1.08"/><rect y="12.92" width="20" height="1.08"/></g><rect width="8.6" height="7.54" fill="#3c3b6e"/><g fill="#fff"><circle cx="1.6" cy="1.5" r=".45"/><circle cx="3.6" cy="1.5" r=".45"/><circle cx="5.6" cy="1.5" r=".45"/><circle cx="7.6" cy="1.5" r=".45"/><circle cx="2.6" cy="3" r=".45"/><circle cx="4.6" cy="3" r=".45"/><circle cx="6.6" cy="3" r=".45"/><circle cx="1.6" cy="4.5" r=".45"/><circle cx="3.6" cy="4.5" r=".45"/><circle cx="5.6" cy="4.5" r=".45"/><circle cx="7.6" cy="4.5" r=".45"/><circle cx="2.6" cy="6" r=".45"/><circle cx="4.6" cy="6" r=".45"/><circle cx="6.6" cy="6" r=".45"/></g></svg></button></div>
+        <div class="modal" id="modalDespesa"><div class="modal-content" style="max-width:560px">
+            <div class="modal-header"><span>✏️ Editar despesa</span><button class="modal-close" onclick="fecharModal('modalDespesa')" aria-label="×">×</button></div>
+            <p class="ed-origem" id="edOrigem"></p>
+            <div class="ed-grid">
+                <div class="form-group full"><label for="edDescricao">Descrição</label><input id="edDescricao" type="text" maxlength="120" onkeydown="if(event.key==='Enter')salvarEdicaoDespesa()"></div>
+                <div class="form-group"><label for="edValor">Valor (R$)</label><input id="edValor" type="number" step="0.01" min="0" inputmode="decimal" onkeydown="if(event.key==='Enter')salvarEdicaoDespesa()"></div>
+                <div class="form-group"><label for="edData">Data</label><input id="edData" type="date"></div>
+                <div class="form-group full"><label for="edCategoria">Categoria</label><select id="edCategoria"></select></div>
+                <div class="ed-checks full"><label><input type="checkbox" id="edPendente"> Ainda não paguei</label><label><input type="checkbox" id="edRecorrente"> 🔁 Repetir todo mês</label></div>
+            </div>
+            <div class="modal-footer"><button class="danger" style="margin-right:auto" onclick="fecharModal('modalDespesa'); deletarDespesa(despEditando)">Excluir</button><button class="secondary" onclick="fecharModal('modalDespesa')">Cancelar</button><button onclick="salvarEdicaoDespesa()">💾 Salvar</button></div>
+        </div></div>
+        <div class="modal" id="modalEscopo"><div class="modal-content" style="max-width:440px">
+            <div class="modal-header"><span>🔁 Esta despesa repete todo mês</span></div>
+            <p class="nv-p" style="margin-bottom:14px">Onde aplicar a mudança?</p>
+            <div class="esc-opcoes"><button class="secondary" id="escEste">Só este mês<small>Os próximos meses continuam como estavam.</small></button><button id="escProx">Este e os próximos meses<small>Ex.: o aluguel subiu. Os meses anteriores não mudam.</small></button></div>
+            <div class="modal-footer"><button class="secondary" id="escCancelar">Cancelar</button></div>
+        </div></div>
         <div class="modal" id="modalNuvem"><div class="modal-content" style="max-width:440px">
             <div class="modal-header"><span>☁️ Entrar na nuvem</span><button class="modal-close" onclick="fecharModal('modalNuvem')" aria-label="×">×</button></div>
             <p class="nv-p">Use o e-mail e a senha que você criou no Supabase. Seus dados ficam iguais no computador, no celular e no tablet.</p>
@@ -868,8 +963,10 @@
                 <div class="section">
                     <div class="section-title lbl-row"><span>Despesas de <span id="mesAnoAtual"></span></span><button class="secondary small" id="btnSelDesp" onclick="alternarSelecao()">☑ Selecionar</button></div>
                     <div id="despesasSelBar"></div>
+                    <div class="desp-filtros"><input type="search" id="despBusca" placeholder="🔎 Procurar despesa…" oninput="filtrarDespesas()" autocomplete="off"><select id="despFiltroCat" onchange="filtrarDespesas()"><option value="">Todas as categorias</option></select><label class="chk"><input type="checkbox" id="despSoPend" onchange="filtrarDespesas()"> Só a pagar</label><div id="despFiltroInfo" class="card-meta"></div></div>
                     <div id="despesasResume" class="stat-cards"></div>
                     <div id="despesasCats" class="cat-list" style="margin-bottom: 24px;"></div>
+                    <div id="despAssinaturas"></div>
                     <div id="despesasList"></div>
                 </div>
             </div>
@@ -963,7 +1060,7 @@
             </div>
 
             <!-- ================= CORTES (1.7) ================= -->
-            <div id="cortes" class="tab-content">
+            <div id="cortes" class="tab-content" hidden>
                 <div class="section-head">
                     <div>
                         <div class="section-title" style="margin-bottom:2px;">✂️ Cortes de gastos</div>
@@ -1234,7 +1331,7 @@
     <div id="modalPlano" class="modal">
         <div class="modal-content" style="max-width: 780px;">
             <div class="modal-header"><span>Plano — <span id="planoTitulo"></span></span><button class="modal-close" onclick="fecharModal('modalPlano')">✕</button></div>
-            <p class="card-meta" style="margin:-4px 0 10px;">Quanto guardar, limites do mês e os cortes que você aceitou.</p>
+            <p class="card-meta" style="margin:-4px 0 10px;">Quanto guardar por mês e os limites de cada categoria.</p>
             <div style="font-size:14px;" id="planoInfo"></div>
             <div class="cbar" style="height:10px;"><i id="planoBarra" style="background:var(--accent);"></i></div>
             <div class="plano-top">
@@ -1245,7 +1342,7 @@
             <div class="card-meta" id="planoDica"></div>
             <div class="plano-sec"><h4>Este mês, semana a semana</h4><div class="psems" id="planoSemanas"></div></div>
             <div class="plano-sec" id="planoLimitesSec"><h4>Limites do mês por categoria</h4><p class="card-meta" style="margin:0 0 12px;">Deixe em branco para não ter limite. O número cinza é a sua média dos últimos 3 meses.</p><div id="planoLimites"></div></div>
-            <div class="plano-sec"><h4 style="display:flex; justify-content:space-between; gap:8px;"><span>Cortes do plano</span><span class="card-meta" id="planoCortesTotal" style="font-weight:600; color:var(--pago-text);"></span></h4><div id="planoCortesLista" style="margin-top:8px;"></div>
+            <div class="plano-sec" style="display:none"><h4 style="display:flex; justify-content:space-between; gap:8px;"><span>Cortes do plano</span><span class="card-meta" id="planoCortesTotal" style="font-weight:600; color:var(--pago-text);"></span></h4><div id="planoCortesLista" style="margin-top:8px;"></div>
                 <button class="link-btn" onclick="fecharModal('modalPlano'); switchTab('cortes', document.querySelector('.tab-button[data-tab=cortes]'));">Ver sugestões em ✂️ Cortes</button></div>
             <div class="modal-footer">
                 <button class="danger" style="margin-right:auto;" onclick="removerPlano()">Remover plano</button>
@@ -2417,10 +2514,10 @@
             let novas = 0;
             Object.values(ultimas).forEach(d => {
                 if (`${d.ano}-${d.mes}` >= `${ano}-${mes}`) return;
-                if (dados.some(x => x.mes === mes && x.ano === ano && chave(x) === chave(d))) return;
+                if (dados.some(x => x.mes === mes && x.ano === ano && (chave(x) === chave(d) || x.serie === chave(d)))) return;
                 const ultimoDia = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0).getDate();
                 const dia = Math.min(parseInt((d.data || '').slice(8, 10)) || 1, ultimoDia);
-                dados.push({ id: Date.now() + novas, mes, ano, categoria: d.categoria, descricao: d.descricao, valor: d.valor, data: `${ano}-${mes}-${String(dia).padStart(2, '0')}`, recorrente: true, pendente: true, geradaDe: d.id });
+                dados.push({ id: Date.now() + novas, mes, ano, categoria: d.categoria, descricao: d.descricao, valor: d.valorFixo ?? d.valor, data: `${ano}-${mes}-${String(dia).padStart(2, '0')}`, recorrente: true, pendente: true, geradaDe: d.id });
                 novas++;
             });
             if (novas) { save('financas', dados); toast(`🔁 ${novas} despesa${novas === 1 ? '' : 's'} fixa${novas === 1 ? '' : 's'} lançada${novas === 1 ? '' : 's'} para este mês`); }
@@ -2487,11 +2584,12 @@
                     <div class="card-header">
                         <div>
                             <div class="card-title">${esc(d.descricao)} ${d.recorrente ? `<span class="badge" style="background:var(--surface-3); color:var(--muted); margin-left:6px;">🔁 Mensal</span>` : ''}${d.pendente ? `<span class="badge badge-pendente" style="margin-left:6px;">A PAGAR</span>` : ''}</div>
-                            <div class="card-meta">${esc(nomeCat(d.categoria))} • ${fmtData(d.data)}</div>
+                            <div class="card-meta"><button class="cat-chip" onclick="event.stopPropagation(); trocarCategoria(${d.id}, this)">${esc(nomeCat(d.categoria))} ▾</button> • ${fmtData(d.data)}</div>
                         </div>
                         <div style="display:flex; align-items:center; gap:14px;">
                             <div class="card-title" style="color:${d.pendente ? 'var(--pend-text)' : 'var(--accent)'};">${fmtMoney(d.valor)}</div>
                             ${d.pendente ? `<button class="small" onclick="marcarDespesaPaga(${d.id})">✓ Paguei</button>` : ''}${d.recorrente ? `<button class="small secondary" onclick="pararRecorrente(${d.id})" title="Parar repetição">🔁 ✕</button>` : ''}
+                            <button class="small secondary" onclick="abrirEditarDespesa(${d.id})" title="Editar">✏️</button>
                             <button class="small danger" onclick="deletarDespesa(${d.id})">Excluir</button>
                         </div>
                     </div>
@@ -2509,7 +2607,7 @@
                             <button class="small secondary" data-a="Ocultar" data-b="Ver compras" onclick="const g = this.closest('.cc-group'); g.classList.toggle('open'); this.textContent = g.classList.contains('open') ? this.dataset.a : this.dataset.b;">${abertos.has('cc-' + k) ? "Ocultar" : "Ver compras"}</button>
                         </div>
                     </div>
-                    <div class="cc-items">${its.map(d => `<div class="cc-item" data-desp="${d.id}"><span>${esc(d.descricao)}<span class="card-meta">${esc(nomeCat(d.categoria))} • ${fmtData(d.data)}</span></span><span style="display:flex; gap:10px; align-items:center;"><b>${fmtMoney(d.valor)}</b><button class="small danger" onclick="deletarDespesa(${d.id})">✕</button></span></div>`).join('')}</div>
+                    <div class="cc-items">${its.map(d => `<div class="cc-item" data-desp="${d.id}"><span>${esc(d.descricao)}<span class="card-meta"><button class="cat-chip" onclick="event.stopPropagation(); trocarCategoria(${d.id}, this)">${esc(nomeCat(d.categoria))} ▾</button> • ${fmtData(d.data)}</span></span><span style="display:flex; gap:10px; align-items:center;"><b>${fmtMoney(d.valor)}</b><button class="small secondary" onclick="abrirEditarDespesa(${d.id})" title="Editar">✏️</button><button class="small danger" onclick="deletarDespesa(${d.id})">✕</button></span></div>`).join('')}</div>
                 </div>`;
             }).join('');
             decorarSelecao();
@@ -3758,6 +3856,336 @@ ${e.nome || ''}`;
         }
 
         // ---------- INICIALIZAÇÃO ----------
+
+        // ================= 2.1 — EDITAR DESPESA, BUSCA, ASSINATURAS, ANIMAÇÕES, AVISO DE SITE NOVO =================
+        const EN210 = (document.documentElement.lang || '').startsWith('en');
+        const T2 = EN210 ? {
+            desfazer: 'Undo', desfeito: '↩️ Undone', salvo: '✅ Expense updated', excluida: '🗑️ Expense deleted', preencha: 'Fill in description, amount, category and date.',
+            excluirConf: 'Delete this expense?', excluirTit: 'Delete expense', importada: 'Imported from the bank statement',
+            parecidas: n => `Apply to ${n} similar`, lembrar: 'Remember for next imports', aplicadas: n => `✅ Category applied to ${n} similar expense${n === 1 ? '' : 's'}`, lembrado: '✅ I’ll remember this category in the next imports',
+            categoriaMudou: c => `✅ Category: ${c}`,
+            busca: '🔎 Search expense…', todasCats: 'All categories', soPend: 'Only to pay', deN: (a, b) => `${a} of ${b}`, nada: 'Nothing found this month.',
+            outrosMeses: 'Also found in:', assTit: '🔁 Subscriptions that repeat', assMes: '/mo', assAno: '/yr', ver: 'See', ocultar: 'Hide', semAss: 'No repeating subscriptions found.',
+            siteNovo: 'New version of the site available', atualizar: 'Update', depois: 'Later'
+        } : {
+            desfazer: 'Desfazer', desfeito: '↩️ Desfeito', salvo: '✅ Despesa atualizada', excluida: '🗑️ Despesa excluída', preencha: 'Preencha descrição, valor, categoria e data.',
+            excluirConf: 'Excluir esta despesa?', excluirTit: 'Excluir despesa', importada: 'Importada do extrato do banco',
+            parecidas: n => `Aplicar às ${n} parecidas`, lembrar: 'Lembrar nas próximas importações', aplicadas: n => `✅ Categoria aplicada a ${n} despesa${n === 1 ? '' : 's'} parecida${n === 1 ? '' : 's'}`, lembrado: '✅ Vou lembrar essa categoria nas próximas importações',
+            categoriaMudou: c => `✅ Categoria: ${c}`,
+            busca: '🔎 Procurar despesa…', todasCats: 'Todas as categorias', soPend: 'Só a pagar', deN: (a, b) => `${a} de ${b}`, nada: 'Nada encontrado neste mês.',
+            outrosMeses: 'Também aparece em:', assTit: '🔁 Assinaturas que se repetem', assMes: '/mês', assAno: '/ano', ver: 'Ver', ocultar: 'Ocultar', semAss: 'Nenhuma assinatura repetida encontrada.',
+            siteNovo: 'Nova versão do site disponível', atualizar: 'Atualizar', depois: 'Depois'
+        };
+        const chaveSerie = d => `${d.categoria}|${(d.descricao || '').trim().toLowerCase()}`;
+        const ymDe = d => `${d.ano}-${d.mes}`;
+        const movimento = () => !(typeof reduzMotion !== 'undefined' && reduzMotion);
+
+        // ---------- aviso com botões (Desfazer, Aplicar às parecidas…) ----------
+        function toastAcao(msg, botoes, ms = 9000) {
+            const t = document.createElement('div'); t.className = 'toast toast-acao';
+            const sp = document.createElement('span'); sp.textContent = msg; t.appendChild(sp);
+            let fechado = false;
+            const fechar = () => { if (fechado) return; fechado = true; t.style.opacity = '0'; t.style.transition = 'opacity 0.25s'; setTimeout(() => t.remove(), 260); };
+            botoes.forEach(([rotulo, fn]) => { const b = document.createElement('button'); b.className = 'small secondary'; b.textContent = rotulo; b.onclick = () => { fechar(); fn(); }; t.appendChild(b); });
+            $('toasts').appendChild(t); setTimeout(fechar, ms);
+            return fechar;
+        }
+        function restaurarFinancas(antes) {
+            save('financas', JSON.parse(antes));
+            atualizarDespesas(); try { atualizarHome(); } catch {}
+            toast(T2.desfeito);
+        }
+
+        // ---------- aplicar uma mudança numa despesa (janela de editar e troca rápida de categoria) ----------
+        // escopo: 'este' = só esta despesa / este mês; 'proximos' = esta e as próximas da mesma despesa fixa
+        function aplicarMudancaDespesa(dados, d, novo, escopo) {
+            const mudouNome = novo.descricao !== d.descricao || novo.categoria !== d.categoria;
+            const mudouValor = Math.abs(novo.valor - d.valor) > 0.0001;
+            const chaveAnt = chaveSerie(d), ymAtual = ymDe(d);
+            if (d.recorrente && !novo.recorrente) {
+                dados.forEach(x => { if (chaveSerie(x) === chaveAnt) x.recorrente = false; });   // parou de repetir
+            } else if (d.recorrente && escopo === 'proximos') {
+                dados.forEach(x => {
+                    if (x.id === d.id || chaveSerie(x) !== chaveAnt) return;
+                    if (ymDe(x) > ymAtual) {
+                        if (mudouNome) { x.descricao = novo.descricao; x.categoria = novo.categoria; }
+                        if (mudouValor) { x.valor = novo.valor; delete x.valorFixo; }
+                    } else if (mudouNome && x.recorrente) x.recorrente = false;            // meses anteriores ficam como histórico
+                });
+                delete d.valorFixo;
+            } else if (d.recorrente && escopo === 'este') {
+                if (mudouNome) { d.serie = chaveAnt; d.recorrente = false; delete d.valorFixo; }  // sai da série; o mês continua "coberto"
+                else if (mudouValor && d.valorFixo == null) d.valorFixo = d.valor;            // próximos meses voltam ao valor de sempre
+            } else if (!d.recorrente && novo.recorrente) d.recorrente = true;
+            d.descricao = novo.descricao; d.categoria = novo.categoria; d.valor = novo.valor;
+            if (d.valorFixo != null && Math.abs(d.valorFixo - d.valor) < 0.0001) delete d.valorFixo;
+            if (novo.data && novo.data !== d.data) { d.data = novo.data; d.ano = novo.data.slice(0, 4); d.mes = novo.data.slice(5, 7); }
+            if (novo.pendente) d.pendente = true; else delete d.pendente;
+        }
+        function escolherEscopo() {
+            return new Promise(resolve => {
+                const fim = r => { fecharModal('modalEscopo'); resolve(r); };
+                $('escEste').onclick = () => fim('este');
+                $('escProx').onclick = () => fim('proximos');
+                $('escCancelar').onclick = () => fim(null);
+                abrirModal('modalEscopo');
+            });
+        }
+        // depois de mudar a categoria: oferece aplicar às parecidas e lembrar para as importações
+        function oferecerParecidas(d, catAntiga, antes, msg) {
+            const k = chaveMemo(d.descricao);
+            const botoes = [];
+            if (k && d.categoria !== catAntiga) {
+                const parecidas = load('financas', []).filter(x => x.id !== d.id && chaveMemo(x.descricao) === k && x.categoria !== d.categoria);
+                const lembrarRegra = () => { const cfg = load('config', {}); (cfg.regrasCategoria = cfg.regrasCategoria || {})[k] = d.categoria; save('config', cfg); };
+                if (parecidas.length) botoes.push([T2.parecidas(parecidas.length), () => {
+                    const dados = load('financas', []); let n = 0;
+                    dados.forEach(x => { if (x.id !== d.id && chaveMemo(x.descricao) === k && x.categoria !== d.categoria) { x.categoria = d.categoria; n++; } });
+                    save('financas', dados); lembrarRegra(); atualizarDespesas(); try { atualizarHome(); } catch {}
+                    toastAcao(T2.aplicadas(n), [[T2.desfazer, () => restaurarFinancas(antes)]]);
+                }]);
+                else if (d.origem) botoes.push([T2.lembrar, () => { lembrarRegra(); toast(T2.lembrado); }]);
+            }
+            botoes.push([T2.desfazer, () => restaurarFinancas(antes)]);
+            toastAcao(msg, botoes, botoes.length > 1 ? 12000 : 8000);
+        }
+
+        // ---------- janela de editar ----------
+        let despEditando = null;
+        function opcoesCategoria(atual) {
+            const ops = [...$('categoria').options].filter(o => o.value !== '__nova' && o.value !== '').map(o => o.outerHTML).join('');
+            const tem = [...$('categoria').options].some(o => o.value === atual);
+            return ops + (tem || !atual ? '' : `<option value="${esc(atual)}">${esc(nomeCat(atual))}</option>`);
+        }
+        function abrirEditarDespesa(id) {
+            if (typeof selDesp !== 'undefined' && selDesp) return;
+            const d = load('financas', []).find(x => x.id === id); if (!d) return;
+            despEditando = id;
+            $('edCategoria').innerHTML = opcoesCategoria(d.categoria);
+            $('edCategoria').value = d.categoria;
+            $('edDescricao').value = d.descricao || '';
+            $('edValor').value = d.valor;
+            $('edData').value = d.data || hojeISO();
+            $('edPendente').checked = !!d.pendente;
+            $('edRecorrente').checked = !!d.recorrente;
+            $('edOrigem').textContent = d.origem ? '🏦 ' + T2.importada : '';
+            abrirModal('modalDespesa');
+            setTimeout(() => $('edDescricao').focus(), 60);
+        }
+        async function salvarEdicaoDespesa() {
+            const dados = load('financas', []); const d = dados.find(x => x.id === despEditando);
+            if (!d) { fecharModal('modalDespesa'); return; }
+            const novo = {
+                descricao: $('edDescricao').value.trim(), valor: parseFloat(String($('edValor').value).replace(',', '.')),
+                categoria: $('edCategoria').value, data: $('edData').value, pendente: $('edPendente').checked, recorrente: $('edRecorrente').checked
+            };
+            if (!novo.descricao || !(novo.valor > 0) || !novo.categoria || !novo.data) { toast(T2.preencha, true); return; }
+            const antes = JSON.stringify(dados), catAntiga = d.categoria;
+            const mudouNomeOuValor = novo.descricao !== d.descricao || novo.categoria !== d.categoria || Math.abs(novo.valor - d.valor) > 0.0001;
+            let escopo = 'este';
+            if (d.recorrente && novo.recorrente && mudouNomeOuValor) { escopo = await escolherEscopo(); if (!escopo) return; }
+            aplicarMudancaDespesa(dados, d, novo, escopo);
+            save('financas', dados);
+            fecharModal('modalDespesa');
+            if (d.mes !== $('mes').value || d.ano !== $('ano').value) { /* mudou de mês: a lista atual perde o item */ }
+            despNovo = d.id;
+            atualizarDespesas(); try { atualizarHome(); } catch {}
+            try { avisarLimite(d.categoria, d.mes, d.ano, 0); } catch {}
+            oferecerParecidas(d, catAntiga, antes, T2.salvo);
+        }
+
+        // ---------- troca rápida de categoria (clicar na etiqueta) ----------
+        function fecharPopCat() { document.querySelectorAll('.cat-pop').forEach(p => p.remove()); }
+        function trocarCategoria(id, btn) {
+            fecharPopCat();
+            if (typeof selDesp !== 'undefined' && selDesp) return;
+            const d = load('financas', []).find(x => x.id === id); if (!d) return;
+            const pop = document.createElement('div'); pop.className = 'cat-pop'; pop.setAttribute('role', 'listbox');
+            [...$('categoria').options].filter(o => o.value && o.value !== '__nova' && !o.disabled).forEach(o => {
+                const b = document.createElement('button'); b.type = 'button'; b.textContent = o.textContent; b.className = o.value === d.categoria ? 'on' : '';
+                b.onclick = ev => { ev.stopPropagation(); fecharPopCat(); mudarCategoriaRapido(id, o.value); };
+                pop.appendChild(b);
+            });
+            document.body.appendChild(pop);
+            const r = btn.getBoundingClientRect(), w = Math.min(260, window.innerWidth - 20);
+            pop.style.width = w + 'px';
+            pop.style.left = Math.max(10, Math.min(r.left + window.scrollX, window.scrollX + window.innerWidth - w - 10)) + 'px';
+            const abaixo = window.innerHeight - r.bottom > 280;
+            pop.style.top = (abaixo ? r.bottom + 6 : Math.max(10, r.top - Math.min(320, pop.offsetHeight) - 6)) + window.scrollY + 'px';
+            pop.querySelector('.on')?.scrollIntoView({ block: 'center' });
+        }
+        document.addEventListener('click', e => { if (!e.target.closest('.cat-pop') && !e.target.closest('.cat-chip')) fecharPopCat(); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') fecharPopCat(); });
+        window.addEventListener('resize', fecharPopCat);
+        function mudarCategoriaRapido(id, cat) {
+            const dados = load('financas', []); const d = dados.find(x => x.id === id); if (!d || d.categoria === cat) return;
+            const antes = JSON.stringify(dados), catAntiga = d.categoria;
+            aplicarMudancaDespesa(dados, d, { descricao: d.descricao, valor: d.valor, categoria: cat, data: d.data, pendente: !!d.pendente, recorrente: !!d.recorrente }, d.recorrente ? 'proximos' : 'este');
+            save('financas', dados); despNovo = d.id;
+            atualizarDespesas(); try { atualizarHome(); } catch {}
+            oferecerParecidas(d, catAntiga, antes, T2.categoriaMudou(nomeCat(cat)));
+        }
+
+        // ---------- excluir com animação e Desfazer ----------
+        deletarDespesa = async function (id) {
+            if (!await confirmar(T2.excluirConf, T2.excluirTit)) return;
+            const el = document.querySelector(`#despesasList [data-desp="${id}"]`);
+            if (el && movimento()) { el.style.maxHeight = el.offsetHeight + 'px'; el.classList.add('saindo'); await new Promise(r => setTimeout(r, 260)); }
+            const antes = localStorage.getItem('financas');
+            lembrarExcluidas(load('financas', []).filter(d => d.id === id));
+            save('financas', load('financas', []).filter(d => d.id !== id));
+            atualizarDespesas(); try { atualizarHome(); } catch {}
+            toastAcao(T2.excluida, [[T2.desfazer, () => restaurarFinancas(antes)]]);
+        };
+
+        // ---------- busca e filtros ----------
+        function filtrarDespesas() {
+            const lista = $('despesasList'); if (!lista) return;
+            const q = normTxt($('despBusca')?.value || ''), cat = $('despFiltroCat')?.value || '', pend = $('despSoPend')?.checked;
+            const fin = load('financas', []), porId = new Map(fin.map(d => [d.id, d]));
+            const ativo = !!(q || cat || pend);
+            let vis = 0, tot = 0;
+            lista.querySelectorAll('[data-desp]').forEach(el => {
+                const d = porId.get(+el.dataset.desp); if (!d) return; tot++;
+                const ok = (!q || normTxt(`${d.descricao} ${nomeCat(d.categoria)} ${d.valor}`).includes(q)) && (!cat || d.categoria === cat) && (!pend || d.pendente);
+                el.classList.toggle('filtrado', !ok); if (ok) vis++;
+            });
+            lista.querySelectorAll('.cc-group').forEach(g => {
+                const algum = [...g.querySelectorAll('.cc-item[data-desp]')].some(e => !e.classList.contains('filtrado'));
+                g.classList.toggle('filtrado', !algum);
+                if (ativo && algum) g.classList.add('open');
+            });
+            const info = $('despFiltroInfo');
+            if (info) {
+                let html = ativo ? (vis ? T2.deN(vis, tot) : T2.nada) : '';
+                if (q.length >= 2) {
+                    const atual = `${$('ano').value}-${$('mes').value}`, meses = {};
+                    fin.forEach(d => { const ym = ymDe(d); if (ym !== atual && normTxt(`${d.descricao} ${nomeCat(d.categoria)}`).includes(q)) meses[ym] = (meses[ym] || 0) + 1; });
+                    const lst = Object.entries(meses).sort((a, b) => b[0].localeCompare(a[0])).slice(0, 6);
+                    if (lst.length) html += ` <span class="outros-meses">${T2.outrosMeses} ${lst.map(([ym, n]) => `<button class="link-btn" onclick="irParaMes('${ym}')">${MESES[parseInt(ym.slice(5))].slice(0, 3)} ${ym.slice(0, 4)} (${n})</button>`).join(' ')}</span>`;
+                }
+                info.innerHTML = html;
+            }
+        }
+        function irParaMes(ym) {
+            const [a, m] = ym.split('-');
+            if (![...$('ano').options].some(o => o.value === a)) $('ano').insertAdjacentHTML('beforeend', `<option value="${a}">${a}</option>`);
+            $('ano').value = a; $('mes').value = m; atualizarDespesas();
+        }
+        function preencherFiltroCat() {
+            const sel = $('despFiltroCat'); if (!sel) return;
+            const atual = sel.value, mes = $('mes').value, ano = $('ano').value;
+            const cats = [...new Set(load('financas', []).filter(d => d.mes === mes && d.ano === ano).map(d => d.categoria))].sort((a, b) => nomeCat(a).localeCompare(nomeCat(b)));
+            sel.innerHTML = `<option value="">${T2.todasCats}</option>` + cats.map(c => `<option value="${esc(c)}">${esc(nomeCat(c))}</option>`).join('');
+            if (cats.includes(atual)) sel.value = atual;
+        }
+
+        // ---------- assinaturas que se repetem (o que ficou da aba Cortes) ----------
+        let assAberto = false;
+        function renderAssinaturas() {
+            const box = $('despAssinaturas'); if (!box) return;
+            let a; try { a = analisarGastos(); } catch { box.innerHTML = ''; return; }
+            const ass = a.assinaturas || [];
+            if (!ass.length) { box.innerHTML = ''; return; }
+            const mes = ass.reduce((s, x) => s + x.valor, 0), ano = ass.reduce((s, x) => s + (x.ano || x.valor * 12), 0);
+            box.innerHTML = `
+                <div class="ass-card ${assAberto ? 'open' : ''}">
+                    <button class="ass-topo" onclick="assAberto = !assAberto; this.parentElement.classList.toggle('open', assAberto); this.querySelector('.tg').textContent = assAberto ? '${T2.ocultar}' : '${T2.ver}';">
+                        <span class="t">${T2.assTit} <span class="badge" style="background:var(--surface-3); color:var(--muted);">${ass.length}</span></span>
+                        <span class="v"><b>${fmtMoney(mes)}</b>${T2.assMes} <span class="card-meta">· ${fmtMoney(ano)}${T2.assAno}</span></span>
+                        <span class="tg">${assAberto ? T2.ocultar : T2.ver}</span>
+                    </button>
+                    <div class="ass-lista">${ass.map(x => `<div class="ass-row"><span class="nm">${esc(x.nome)}</span>${x.parecido ? `<span class="imp-tag warn">${esc(fmtT(TX.parecidoCom, { n: x.parecido }))}</span>` : ''}<span class="v">${fmtMoney(x.valor)}</span><span class="a">${fmtMoney(x.ano)}${TX.barraAno}</span></div>`).join('')}</div>
+                </div>`;
+        }
+
+        // ---------- depois de desenhar a lista de despesas ----------
+        let despNovo = null;
+        function decorarDespesas() {
+            const lista = $('despesasList'); if (!lista) return;
+            lista.querySelectorAll('.card[data-desp], .cc-item[data-desp]').forEach(el => {
+                el.classList.add('editavel');
+                el.addEventListener('click', e => {
+                    if (e.target.closest('button, input, a, label, select')) return;
+                    if (typeof selDesp !== 'undefined' && selDesp) return;
+                    abrirEditarDespesa(+el.dataset.desp);
+                });
+            });
+            if (despNovo != null) {
+                const el = lista.querySelector(`[data-desp="${despNovo}"]`);
+                if (el) { el.classList.add('novo'); if (movimento()) el.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
+                despNovo = null;
+            }
+        }
+        const _atualizarDespesas210 = atualizarDespesas;
+        atualizarDespesas = function () {
+            _atualizarDespesas210.apply(this, arguments);
+            preencherFiltroCat(); decorarDespesas(); filtrarDespesas(); renderAssinaturas();
+        };
+        const _adicionarDespesa210 = adicionarDespesa;
+        adicionarDespesa = function () {
+            const antes = new Set(load('financas', []).map(d => d.id));
+            const lista0 = load('financas', []).length;
+            _adicionarDespesa210.apply(this, arguments);
+            const nova = load('financas', []).find(d => !antes.has(d.id));
+            if (nova && load('financas', []).length > lista0) {
+                const el = document.querySelector(`#despesasList [data-desp="${nova.id}"]`);
+                if (el) { el.classList.add('novo'); if (movimento()) el.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
+            }
+        };
+
+        // ---------- troca de aba: desliza para o lado certo e o destaque "corre" até a aba ----------
+        function moverIndicador(instantaneo) {
+            const tabs = document.querySelector('.tabs'), ativo = tabs?.querySelector('.tab-button.active'); if (!tabs || !ativo) return;
+            let ind = tabs.querySelector('.tab-ind');
+            if (!ind) { ind = document.createElement('span'); ind.className = 'tab-ind'; ind.setAttribute('aria-hidden', 'true'); tabs.appendChild(ind); tabs.classList.add('com-ind'); instantaneo = true; }
+            if (instantaneo) ind.style.transition = 'none';
+            ind.style.left = ativo.offsetLeft + 'px'; ind.style.top = ativo.offsetTop + 'px';
+            ind.style.width = ativo.offsetWidth + 'px'; ind.style.height = ativo.offsetHeight + 'px';
+            if (instantaneo) { void ind.offsetWidth; ind.style.transition = ''; }
+        }
+        const _switchTab210 = switchTab;
+        switchTab = function (tab, btn) {
+            const botoes = [...document.querySelectorAll('.tab-button')];
+            const de = botoes.findIndex(b => b.classList.contains('active')), para = botoes.indexOf(btn);
+            _switchTab210.apply(this, arguments);
+            const el = $(tab);
+            if (el) { el.classList.remove('vem-dir', 'vem-esq'); if (de >= 0 && para >= 0 && de !== para) { void el.offsetWidth; el.classList.add(para > de ? 'vem-dir' : 'vem-esq'); } }
+            moverIndicador();
+            if (btn && window.matchMedia('(max-width: 700px)').matches) btn.scrollIntoView({ inline: 'center', block: 'nearest', behavior: movimento() ? 'smooth' : 'auto' });
+        };
+        window.addEventListener('resize', () => moverIndicador(true));
+        if (document.fonts?.ready) document.fonts.ready.then(() => moverIndicador(true));
+        setTimeout(() => moverIndicador(true), 50);
+
+        // ---------- site: avisa quando sai versão nova ----------
+        (function () {
+            if (window.fm || location.protocol !== 'https:') return;
+            const minha = document.querySelector('meta[name="junps-versao"]')?.content;
+            if (!minha) return;
+            let avisado = false;
+            const checar = async () => {
+                if (avisado || document.visibilityState !== 'visible') return;
+                try {
+                    const arq = location.pathname.endsWith('index.en.html') ? 'index.en.html' : 'index.html';
+                    const t = await (await fetch(arq + '?v=' + Date.now(), { cache: 'no-store' })).text();
+                    const nova = (t.match(/<meta name="junps-versao" content="([^"]+)"/) || [])[1];
+                    if (nova && nova !== minha) {
+                        avisado = true;
+                        const bar = document.createElement('div'); bar.className = 'update-bar show'; bar.id = 'siteNovoBar'; bar.setAttribute('role', 'status');
+                        bar.innerHTML = `<span class="dot"></span><span>${T2.siteNovo} (${esc(nova)})</span><button>${T2.atualizar}</button><button class="ghost">${T2.depois}</button>`;
+                        const [b1, b2] = bar.querySelectorAll('button');
+                        b1.onclick = () => { try { sessionStorage.setItem('semSplash', '1'); } catch {} location.reload(); };
+                        b2.onclick = () => bar.remove();
+                        document.body.appendChild(bar);
+                    }
+                } catch {}
+            };
+            document.addEventListener('visibilitychange', checar);
+            setInterval(checar, 10 * 60 * 1000);
+            setTimeout(checar, 8000);
+        })();
+
         (function init() {
             aplicarTema(localStorage.getItem('tema') || 'dark');
             aplicarPrivado();
@@ -3770,10 +4198,12 @@ ${e.nome || ''}`;
             $('ano').addEventListener('change', atualizarDespesas);
             const fecharQualquer = m => {
                 if (m.id === 'modalNuvemEscolha') return;
+                if (m.id === 'modalEscopo') return $('escCancelar').click();
+                if (m.id === 'modalNuvem' && document.documentElement.classList.contains('gate')) return;
                 if (m.id === 'modalConfirm') return $('confirmNao').click();
                 m.id === 'modalEditarCliente' ? fecharModalCliente() : m.classList.remove('active');
             };
-            const FORMULARIOS = ['modalNuvem', 'modalNuvemEscolha', 'modalEditarCliente', 'modalFatura', 'modalEmpresa', 'modalMeta', 'modalPago', 'modalCategorias', 'modalImportar', 'modalPlano', 'modalCheckin'];
+            const FORMULARIOS = ['modalNuvem', 'modalNuvemEscolha', 'modalDespesa', 'modalEscopo', 'modalEditarCliente', 'modalFatura', 'modalEmpresa', 'modalMeta', 'modalPago', 'modalCategorias', 'modalImportar', 'modalPlano', 'modalCheckin'];
             { const dz = $('impDrop'); if (dz) {
                 ['dragenter', 'dragover'].forEach(e => dz.addEventListener(e, ev => { ev.preventDefault(); dz.classList.add('over'); }));
                 ['dragleave', 'drop'].forEach(e => dz.addEventListener(e, ev => { ev.preventDefault(); dz.classList.remove('over'); }));
@@ -4047,6 +4477,7 @@ ${e.nome || ''}`;
             const mesmo = ant.usuario && ant.usuario === r.dados.user?.id && Object.keys(ant.versoes || {}).length > 0;
             guardarSessao(r.dados);
             $('nvSenha').value = '';
+            document.documentElement.classList.remove('gate');
             fecharModal('modalNuvem');
             try { localStorage.removeItem('nuvemSemConta'); } catch {}
             if (mesmo) await sincronizar(); else await primeiraVez();
@@ -4101,8 +4532,16 @@ ${e.nome || ''}`;
         const s = N.estado().sessao;
         if (s) api('/auth/v1/logout', { method: 'POST', token: s.access_token }).catch(() => {});
         N.mudar(e => { e.sessao = null; e.expirou = false; e.usuario = null; e.versoes = {}; e.sujo = {}; });
-        situacao = 'fora'; render();
+        situacao = 'fora'; render(); aplicarPortao();
     }
+
+    // ---------- site: só entra com login ----------
+    function aplicarPortao() {
+        const g = configurado && !ehApp && !N.estado().sessao;
+        document.documentElement.classList.toggle('gate', g);
+        if (g && !$('modalNuvem').classList.contains('active')) window.nuvemAbrirLogin();
+    }
+    window.nuvemPortao = aplicarPortao;
 
     // ---------- tela ----------
     function tempo(iso) {
@@ -4126,6 +4565,7 @@ ${e.nome || ''}`;
             b.title = txt;
             b.querySelector('span').textContent = logado ? '' : T.badgeFora;
         }
+        if (!logado && configurado && !ehApp && !document.documentElement.classList.contains('gate')) setTimeout(aplicarPortao, 0);
         const box = $('nuvemBox'); if (!box) return;
         const extra = logado && sit !== 'sinc' && e.ultimaSync ? ` · ${T.ultima} ${tempo(e.ultimaSync)}` : '';
         const quem = logado && ultimaMudancaRemota?.aparelho ? `<div class="nv-sub">${T.porAparelho} ${esc(ultimaMudancaRemota.aparelho)} · ${tempo(ultimaMudancaRemota.atualizado)}</div>` : '';
@@ -4171,7 +4611,7 @@ ${e.nome || ''}`;
     } else if (adiou && typeof gerarRecorrentes === 'function') {
         if (gerarRecorrentes()) { try { atualizarDespesas(); atualizarHome(); } catch {} }
     }
-    if (configurado && !ehApp && !N.estado().sessao && localStorage.getItem('nuvemSemConta') !== '1') setTimeout(window.nuvemAbrirLogin, 300);
+    setTimeout(aplicarPortao, 300);
 
     const puxar = () => { if (document.visibilityState === 'visible' && N.estado().sessao) sincronizar(); };
     document.addEventListener('visibilitychange', puxar);

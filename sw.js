@@ -1,5 +1,5 @@
 // Junps Finance — funciona sem internet: guarda a página e os ícones; a nuvem (Supabase) nunca passa por aqui
-const CACHE = 'junps-v2.0.0';
+const CACHE = 'junps-v2.1.0';
 const BASE = ['./', './index.html', './index.en.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png', './icons/favicon-32.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(BASE)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
