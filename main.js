@@ -7,6 +7,7 @@ const fs = require('fs');
 let mainWindow;
 
 app.setName('Junps Finance');
+if (process.platform === 'win32') app.setAppUserModelId('io.junpsstudios.financemanager');   // avisos do Windows (check-in de segunda)
 // Mantém os dados (despesas, clientes, faturas) na mesma pasta do app antigo "controle-financas"
 app.setPath('userData', path.join(app.getPath('appData'), 'controle-financas'));
 
